@@ -37,7 +37,8 @@
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         alert("Login successful! Redirecting to dashboard...");
-        window.location.href = "dashboard.html";
+window.location.href = "index3.html";
+        
       } catch (error) {
         alert("Invalid email or password. Please try again.");
         console.error(error);

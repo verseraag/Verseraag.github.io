@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raagverse - Distribute Your Music</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #mobileMenu {
+      display: none;
+    }
+    .menu-open #mobileMenu {
+      display: block;
+    }
+  </style>
+  <script>
+    function redirectToPayment(amount) {
+      const upiId = "raagverse@upi";
+      const payUrl = `upi://pay?pa=${upiId}&pn=Raagverse&am=${amount}&cu=INR`;
+      window.location.href = payUrl;
+    }
+    function toggleMenu() {
+      document.body.classList.toggle('menu-open');
+    }
+    function redirectToLogin() {
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+<body class="bg-black text-white font-sans">
+
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between px-6 py-6 bg-gray-950 shadow-lg sticky top-0 z-50">
+    <div class="text-white text-2xl cursor-pointer" onclick="toggleMenu()">
+      <i class="fas fa-bars"></i>
+    </div>
+    <ul class="flex gap-8 text-sm font-medium">
+      <li><a href="#features" class="hover:text-purple-400 transition">Features</a></li>
+      <li><a href="#pricing" class="hover:text-purple-400 transition">Pricing</a></li>
+      <li><a href="login.html" class="hover:text-purple-400 transition">Login</a></li>
+    </ul>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="bg-gray-900 text-white text-center py-4 space-y-4">
+    <a href="#pricing" class="block hover:text-purple-400">Pricing</a>
+    <a href="#about" class="block hover:text-purple-400">About Us</a>
+    <a href="#" onclick="redirectToLogin()" class="block hover:text-purple-400">Artist Page</a>
+    <a href="#contact" class="block hover:text-purple-400">Contact Us</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="text-center py-24 px-6 bg-gradient-to-br from-black via-gray-900 to-purple-900">
+    <h1 class="text-6xl md:text-7xl font-extrabold mb-6 leading-tight">Distribute Your Music <br class="hidden md:block">To The World</h1>
+    <p class="text-lg md:text-2xl mb-10 text-gray-300 max-w-2xl mx-auto">Reach global audiences through Spotify, Apple Music, YouTube Music, and more with Raagverse.</p>
+    <a href="signup.html" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg transition">Get Started</a>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-black">
+    <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-14 text-center">
+      <div class="glass p-8 rounded-xl">
+        <i class="fas fa-music text-purple-500 text-5xl mb-4"></i>
+        <h3 class="text-2xl font-semibold mb-3">All Major Platforms</h3>
+        <p class="text-gray-400 text-sm">Distribute your music globally on Spotify, Apple Music, JioSaavn, Amazon Music, and more.</p>
+      </div>
+      <div class="glass p-8 rounded-xl">
+        <i class="fas fa-coins text-purple-500 text-5xl mb-4"></i>
+        <h3 class="text-2xl font-semibold mb-3">100% Royalties</h3>
+        <p class="text-gray-400 text-sm">You keep every rupee. No hidden fees or royalty splits — ever.</p>
+      </div>
+      <div class="glass p-8 rounded-xl">
+        <i class="fas fa-upload text-purple-500 text-5xl mb-4"></i>
+        <h3 class="text-2xl font-semibold mb-3">Fast & Simple Upload</h3>
+        <p class="text-gray-400 text-sm">Upload your audio files, album art, and details in minutes — no tech skills needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 bg-gray-900 text-center px-6">
+    <h2 class="text-4xl font-bold text-purple-500 mb-12">Choose Your Plan</h2>
+    <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+      <div class="glass p-8 rounded-xl border border-purple-500">
+        <h3 class="text-2xl font-semibold mb-3">Starter</h3>
+        <p class="text-5xl font-bold mb-6 text-green-400">Free</p>
+        <ul class="text-sm text-gray-300 space-y-2 mb-6">
+          <li>✔ Upload up to 2 tracks/month</li>
+          <li>✔ Basic support</li>
+          <li>✔ Royalties payout</li>
+        </ul>
+        <a href="signup.html" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full text-sm font-medium">Start Free</a>
+      </div>
+      <div class="glass p-8 rounded-xl border border-yellow-400">
+        <h3 class="text-2xl font-semibold mb-3">Pro Artist</h3>
+        <p class="text-5xl font-bold mb-6 text-yellow-300">₹99/mo</p>
+        <ul class="text-sm text-gray-300 space-y-2 mb-6">
+          <li>✔ Unlimited uploads</li>
+          <li>✔ Faster approvals</li>
+          <li>✔ 24/7 support</li>
+        </ul>
+        <button onclick="redirectToPayment(99)" class="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-2 rounded-full text-sm font-medium">Go Pro</button>
+      </div>
+      <div class="glass p-8 rounded-xl border border-red-400">
+        <h3 class="text-2xl font-semibold mb-3">Label Package</h3>
+        <p class="text-5xl font-bold mb-6 text-red-300">₹499/mo</p>
+        <ul class="text-sm text-gray-300 space-y-2 mb-6">
+          <li>✔ For music labels & teams</li>
+          <li>✔ Team access</li>
+          <li>✔ Premium analytics</li>
+        </ul>
+        <button onclick="redirectToPayment(499)" class="bg-red-400 hover:bg-red-500 text-black px-6 py-2 rounded-full text-sm font-medium">Subscribe</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Owner Desk Message Section -->
+  <section class="py-20 bg-gray-950 text-center px-6">
+    <div class="max-w-4xl mx-auto glass p-10 rounded-xl">
+      <h2 class="text-4xl font-bold text-purple-500 mb-6">From the Owner's Desk</h2>
+      <p class="text-gray-300 text-lg">Welcome to Raagverse! Our mission is to empower independent artists and help them distribute their music across the globe. Whether you're a rising star or a seasoned musician, Raagverse is here to support your journey. Let’s create something extraordinary together.</p>
+      <p class="text-purple-400 font-semibold mt-6">— Keshav Sharma, Founder & CEO</p>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="py-20 bg-black text-center px-6">
+    <div class="max-w-3xl mx-auto glass p-10 rounded-xl">
+      <h2 class="text-4xl font-bold text-purple-500 mb-6">About Raagverse</h2>
+      <p class="text-gray-300 text-lg mb-4">Raagverse is an Indian music distribution company based in <span class="text-purple-400 font-semibold">Barbil, Odisha</span>. We help artists from all over the country and beyond share their music with the world.</p>
+      <p class="text-gray-300 text-lg mb-4">We proudly support distribution to over <span class="text-purple-400 font-semibold">420+ platforms</span> including major players like Spotify, Apple Music, YouTube Music, Amazon Music, and more.</p>
+      <p class="text-gray-300 text-lg">Artists distributing through Raagverse can also receive official artist verification on <span class="text-purple-400 font-semibold">Spotify</span> and <span class="text-purple-400 font-semibold">Apple Music</span>, enhancing their brand and reach.</p>
+    </div>
+  </section>
+
+  <!-- Contact Us Section -->
+  <section id="contact" class="py-16 bg-gray-900 text-center px-6">
+    <div class="max-w-2xl mx-auto glass p-8 rounded-xl">
+      <h2 class="text-4xl font-bold text-purple-500 mb-6">Contact Us</h2>
+      <p class="text-gray-300 text-lg mb-2">Instagram: <a href="https://instagram.com/raagversee" class="text-purple-400 hover:underline" target="_blank">@raagversee</a></p>
+      <p class="text-gray-300 text-lg">Email: <a href="mailto:verseraag@gmail.com" class="text-purple-400 hover:underline">verseraag@gmail.com</a></p>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="bg-gradient-to-t from-black to-gray-900 py-16 text-center px-6">
+    <h2 class="text-4xl font-bold mb-6">Ready to Share Your Sound?</h2>
+    <p class="text-gray-400 mb-8 max-w-xl mx-auto">Join thousands of independent artists using Raagverse to grow their music career.</p>
+    <a href="signup.html" class="bg-purple-700 hover:bg-purple-800 text-white px-10 py-4 rounded-full font-semibold text-lg transition shadow-md">Start Distributing</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-950 text-center py-8 text-sm text-gray-500">
+    <div class="mb-4">
+      <a href="https://instagram.com/raagversee" target="_blank" class="mx-2 hover:text-purple-400"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="mx-2 hover:text-purple-400"><i class="fab fa-twitter"></i></a>
+      <a href="#" class="mx-2 hover:text-purple-400"><i class="fab fa-youtube"></i></a>
+    </div>
+    <div class="text-purple-500 font-bold text-xl mb-2">Raagverse</div>
+    &copy; 2025 Raagverse. All rights reserved.
+  </footer>
+
+</body>
+</html>

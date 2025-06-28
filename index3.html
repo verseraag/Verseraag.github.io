@@ -1,89 +1,171 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCwl7UYdBWRwLriPt_IzbnLFFZVlesxIuo",
-    authDomain: "raagverse-dd6c6.firebaseapp.com",
-    projectId: "raagverse-dd6c6",
-    storageBucket: "raagverse-dd6c6.appspot.com",
-    messagingSenderId: "989061470150",
-    appId: "1:989061470150:web:7bb48fea2dde588c4ec4c7",
-    databaseURL: "https://raagverse-dd6c6-default-rtdb.firebaseio.com"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const storage = getStorage(app);
-
-  window.uploadTrack = async function(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const artistName = form[0].value;
-    const trackName = form[1].value;
-    const posterFile = form[2].files[0];
-    const instagram = form[3].value;
-    const facebook = form[4].value;
-    const twitter = form[5].value;
-    const spotify = form[6].value;
-    const apple = form[7].value;
-
-    if (!posterFile) {
-      alert("Please upload a poster image.");
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Raagverse</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     }
+    .glow-border {
+      box-shadow: 0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 30px #a855f7;
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+  <header class="bg-black bg-opacity-90 shadow-lg p-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-purple-500 tracking-widest">Raagverse</h1>
+    <button id="logoutBtn" class="hidden text-sm text-red-400 hover:underline">Logout</button>
+  </header>
 
-    try {
-      const posterPath = `posters/${Date.now()}-${posterFile.name}`;
-      const posterStorageRef = storageRef(storage, posterPath);
-      await uploadBytes(posterStorageRef, posterFile);
-      const posterURL = await getDownloadURL(posterStorageRef);
+  <main class="p-8 max-w-4xl mx-auto">
+    <!-- 🔐 Login/Register Section -->
+    <section id="authSection" class="bg-gray-800 p-6 rounded-xl mb-8 glow-border">
+      <h2 class="text-2xl mb-4 font-semibold text-purple-400">Login / Register</h2>
+      <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-2 rounded bg-gray-700 text-white" required>
+      <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-4 rounded bg-gray-700 text-white" required>
+      <div class="flex gap-2">
+        <button id="loginBtn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded">Login</button>
+        <button id="registerBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded">Register</button>
+      </div>
+      <p id="authMsg" class="text-sm text-green-400 mt-3"></p>
+    </section>
 
-      const trackRef = push(ref(db, "tracks"));
-      await set(trackRef, {
-        artistName,
-        trackName,
-        instagram,
-        facebook,
-        twitter,
-        spotify,
-        apple,
-        posterURL,
-        createdAt: new Date().toISOString(),
-        streams: Math.floor(Math.random() * 5000) + 1000, // placeholder for streams
-        status: "Pending"
+    <!-- 🚀 Upload Form Section -->
+    <section id="upload" class="bg-gray-900 p-6 rounded-xl shadow-xl mb-12 glow-border hidden">
+      <h4 class="text-2xl font-semibold text-purple-400 mb-6">Upload Track</h4>
+      <form id="uploadForm" class="space-y-4">
+        <input type="text" name="artistName" placeholder="Artist Name" class="w-full p-3 rounded bg-gray-800 text-white" required>
+        <input type="text" name="trackName" placeholder="Track Name" class="w-full p-3 rounded bg-gray-800 text-white" required>
+        <input type="file" name="audioFile" accept="audio/*" class="w-full p-3 rounded bg-gray-800 text-white" required>
+        <input type="file" name="coverImage" accept="image/*" class="w-full p-3 rounded bg-gray-800 text-white" required>
+        <input type="text" name="instagram" placeholder="Instagram Handle" class="w-full p-3 rounded bg-gray-800 text-white">
+        <input type="text" name="facebook" placeholder="Facebook Profile" class="w-full p-3 rounded bg-gray-800 text-white">
+        <input type="text" name="twitter" placeholder="X (Twitter) Handle" class="w-full p-3 rounded bg-gray-800 text-white">
+        <input type="url" name="spotify" placeholder="Spotify Artist Profile" class="w-full p-3 rounded bg-gray-800 text-white">
+        <input type="url" name="apple" placeholder="Apple Music Artist Profile" class="w-full p-3 rounded bg-gray-800 text-white">
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded font-bold">Upload</button>
+      </form>
+    </section>
+
+    <!-- 🎧 Releases Section -->
+    <section id="releases" class="bg-gray-900 p-6 rounded-xl shadow-xl glow-border">
+      <h4 class="text-2xl font-semibold text-purple-400 mb-6">My Releases</h4>
+      <div id="releaseList" class="space-y-6"></div>
+    </section>
+  </main>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCwl7UYdBWRwLriPt_IzbnLFFZVlesxIuo",
+      authDomain: "raagverse-dd6c6.firebaseapp.com",
+      projectId: "raagverse-dd6c6",
+      storageBucket: "raagverse-dd6c6.appspot.com",
+      messagingSenderId: "989061470150",
+      appId: "1:989061470150:web:7bb48fea2dde588c4ec4c7"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+    const db = firebase.firestore();
+
+    const uploadSection = document.getElementById("upload");
+    const authSection = document.getElementById("authSection");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const authMsg = document.getElementById("authMsg");
+
+    // Auth logic
+    document.getElementById("loginBtn").onclick = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => authMsg.textContent = "Logged in ✅")
+        .catch(err => alert(err.message));
+    };
+
+    document.getElementById("registerBtn").onclick = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => authMsg.textContent = "Account created ✅")
+        .catch(err => alert(err.message));
+    };
+
+    logoutBtn.onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authSection.classList.add("hidden");
+        uploadSection.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+      } else {
+        authSection.classList.remove("hidden");
+        uploadSection.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+      }
+    });
+
+    // Upload track
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form).entries());
+      const audioFile = form.audioFile.files[0];
+      const coverImage = form.coverImage.files[0];
+
+      const timestamp = Date.now();
+      const audioRef = storage.ref(`tracks/${timestamp}-${audioFile.name}`);
+      const imageRef = storage.ref(`covers/${timestamp}-${coverImage.name}`);
+
+      await audioRef.put(audioFile);
+      await imageRef.put(coverImage);
+
+      const audioURL = await audioRef.getDownloadURL();
+      const imageURL = await imageRef.getDownloadURL();
+
+      await db.collection("tracks").add({
+        ...data,
+        audioURL,
+        imageURL,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        user: auth.currentUser.email
       });
 
-      alert("Track uploaded successfully!");
+      alert("✅ Track uploaded!");
       form.reset();
-    } catch (err) {
-      console.error("Upload failed", err);
-      alert("Something went wrong while uploading.");
-    }
-  };
-
-  // Fetch and display tracks in "My Releases"
-  const releasesTable = document.querySelector("#releases tbody");
-  const tracksRef = ref(db, "tracks");
-
-  onValue(tracksRef, (snapshot) => {
-    releasesTable.innerHTML = ""; // Clear existing rows
-    snapshot.forEach((childSnapshot) => {
-      const data = childSnapshot.val();
-
-      const row = document.createElement("tr");
-      row.className = "border-b border-gray-800";
-
-      row.innerHTML = `
-        <td class="p-2">${data.trackName}</td>
-        <td class="p-2">${data.streams || 0}</td>
-        <td class="p-2">${new Date(data.createdAt).toISOString().slice(0, 10)}</td>
-        <td class="p-2 text-yellow-400">${data.status || "Pending"}</td>
-      `;
-
-      releasesTable.appendChild(row);
+      loadReleases();
     });
-  });
-</script>
+
+    // Display all releases
+    async function loadReleases() {
+      const releaseList = document.getElementById("releaseList");
+      releaseList.innerHTML = "";
+
+      const snapshot = await db.collection("tracks").orderBy("createdAt", "desc").get();
+      snapshot.forEach(doc => {
+        const track = doc.data();
+        releaseList.innerHTML += `
+          <div class="bg-purple-800 p-4 rounded-lg shadow-lg">
+            <h5 class="text-xl font-bold">${track.trackName}</h5>
+            <p class="text-sm text-purple-300 mb-2">by ${track.artistName}</p>
+            <img src="${track.imageURL}" class="rounded w-full max-w-xs mb-2" />
+            <audio controls src="${track.audioURL}" class="w-full mt-2"></audio>
+          </div>
+        `;
+      });
+    }
+
+    window.onload = loadReleases;
+  </script>
+</body>
+</html>

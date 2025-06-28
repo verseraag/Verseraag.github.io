@@ -1,189 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Raagverse Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCwl7UYdBWRwLriPt_IzbnLFFZVlesxIuo",
-      authDomain: "raagverse-dd6c6.firebaseapp.com",
-      projectId: "raagverse-dd6c6",
-      storageBucket: "raagverse-dd6c6.appspot.com",
-      messagingSenderId: "989061470150",
-      appId: "1:989061470150:web:7bb48fea2dde588c4ec4c7"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwl7UYdBWRwLriPt_IzbnLFFZVlesxIuo",
+    authDomain: "raagverse-dd6c6.firebaseapp.com",
+    projectId: "raagverse-dd6c6",
+    storageBucket: "raagverse-dd6c6.appspot.com",
+    messagingSenderId: "989061470150",
+    appId: "1:989061470150:web:7bb48fea2dde588c4ec4c7",
+    databaseURL: "https://raagverse-dd6c6-default-rtdb.firebaseio.com"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const storage = getStorage(app);
 
-    window.uploadTrack = async function(event) {
-      event.preventDefault();
+  window.uploadTrack = async function(event) {
+    event.preventDefault();
 
-      const form = event.target;
-      const artistName = form[0].value;
-      const trackName = form[1].value;
-      const posterFile = form[2].files[0];
-      const instagram = form[3].value;
-      const facebook = form[4].value;
-      const twitter = form[5].value;
-      const spotify = form[6].value;
-      const apple = form[7].value;
+    const form = event.target;
+    const artistName = form[0].value;
+    const trackName = form[1].value;
+    const posterFile = form[2].files[0];
+    const instagram = form[3].value;
+    const facebook = form[4].value;
+    const twitter = form[5].value;
+    const spotify = form[6].value;
+    const apple = form[7].value;
 
-      if (!posterFile) {
-        alert("Please upload a poster image.");
-        return;
-      }
+    if (!posterFile) {
+      alert("Please upload a poster image.");
+      return;
+    }
 
-      try {
-        const posterRef = ref(storage, `posters/${Date.now()}-${posterFile.name}`);
-        await uploadBytes(posterRef, posterFile);
-        const posterURL = await getDownloadURL(posterRef);
+    try {
+      const posterPath = `posters/${Date.now()}-${posterFile.name}`;
+      const posterStorageRef = storageRef(storage, posterPath);
+      await uploadBytes(posterStorageRef, posterFile);
+      const posterURL = await getDownloadURL(posterStorageRef);
 
-        await addDoc(collection(db, "tracks"), {
-          artistName,
-          trackName,
-          instagram,
-          facebook,
-          twitter,
-          spotify,
-          apple,
-          posterURL,
-          createdAt: new Date()
-        });
+      const trackRef = push(ref(db, "tracks"));
+      await set(trackRef, {
+        artistName,
+        trackName,
+        instagram,
+        facebook,
+        twitter,
+        spotify,
+        apple,
+        posterURL,
+        createdAt: new Date().toISOString(),
+        streams: Math.floor(Math.random() * 5000) + 1000, // placeholder for streams
+        status: "Pending"
+      });
 
-        alert("Track uploaded successfully!");
-        form.reset();
-      } catch (err) {
-        console.error("Upload failed", err);
-        alert("Something went wrong while uploading.");
-      }
-    };
-  </script>
-</head>
-<body class="bg-gray-950 text-white font-sans">
-  <!-- Sidebar -->
-  <div class="flex min-h-screen">
-    <aside class="w-64 bg-black shadow-lg p-6 space-y-8">
-      <h1 class="text-2xl font-bold text-purple-500 mb-10">Raagverse</h1>
-      <nav class="space-y-4">
-        <a href="#" class="block text-gray-300 hover:text-purple-400">Dashboard</a>
-        <a href="#upload" class="block text-gray-300 hover:text-purple-400">Upload Track</a>
-        <a href="#releases" class="block text-gray-300 hover:text-purple-400">My Releases</a>
-        <a href="#" class="block text-gray-300 hover:text-purple-400">Analytics</a>
-        <a href="#" class="block text-gray-300 hover:text-purple-400">Earnings</a>
-        <a href="#" class="block text-gray-300 hover:text-purple-400">Settings</a>
-      </nav>
-    </aside>
+      alert("Track uploaded successfully!");
+      form.reset();
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Something went wrong while uploading.");
+    }
+  };
 
-    <!-- Main Content -->
-    <main class="flex-1 p-8">
-      <h2 class="text-4xl font-extrabold text-white mb-2">Artist Name</h2>
-      <p class="text-3xl font-bold text-purple-400 mb-8">Welcome, Artist 👋</p>
+  // Fetch and display tracks in "My Releases"
+  const releasesTable = document.querySelector("#releases tbody");
+  const tracksRef = ref(db, "tracks");
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div class="bg-purple-900 p-6 rounded-xl shadow-lg">
-          <p class="text-sm text-purple-300">Total Streams</p>
-          <h3 class="text-2xl font-bold">12,345</h3>
-        </div>
-        <div class="bg-purple-900 p-6 rounded-xl shadow-lg">
-          <p class="text-sm text-purple-300">Monthly Listeners</p>
-          <h3 class="text-2xl font-bold">2,980</h3>
-        </div>
-        <div class="bg-purple-900 p-6 rounded-xl shadow-lg">
-          <p class="text-sm text-purple-300">Estimated Revenue</p>
-          <h3 class="text-2xl font-bold">₹5,600</h3>
-        </div>
-      </div>
+  onValue(tracksRef, (snapshot) => {
+    releasesTable.innerHTML = ""; // Clear existing rows
+    snapshot.forEach((childSnapshot) => {
+      const data = childSnapshot.val();
 
-      <!-- Chart Section -->
-      <div class="bg-gray-900 p-6 rounded-xl shadow-xl mb-12">
-        <h4 class="text-xl font-semibold mb-4">Monthly Streams</h4>
-        <canvas id="streamChart" height="120"></canvas>
-      </div>
+      const row = document.createElement("tr");
+      row.className = "border-b border-gray-800";
 
-      <!-- Upload Track Section -->
-      <div id="upload" class="bg-gray-900 p-6 rounded-xl shadow-xl mb-12">
-        <h4 class="text-2xl font-semibold text-purple-400 mb-6">Upload Track</h4>
-        <form class="space-y-4" onsubmit="uploadTrack(event)">
-          <div><label class="block mb-1">Artist Name</label><input type="text" class="w-full p-2 rounded bg-gray-800 text-white" required></div>
-          <div><label class="block mb-1">Track Name</label><input type="text" class="w-full p-2 rounded bg-gray-800 text-white" required></div>
-          <div><label class="block mb-1">Track Poster</label><input type="file" class="w-full p-2 rounded bg-gray-800 text-white" accept="image/*" required></div>
-          <div><label class="block mb-1">Instagram Handle</label><input type="text" class="w-full p-2 rounded bg-gray-800 text-white"></div>
-          <div><label class="block mb-1">Facebook Profile</label><input type="text" class="w-full p-2 rounded bg-gray-800 text-white"></div>
-          <div><label class="block mb-1">X (Twitter) Handle</label><input type="text" class="w-full p-2 rounded bg-gray-800 text-white"></div>
-          <div><label class="block mb-1">Spotify Artist Profile</label><input type="url" class="w-full p-2 rounded bg-gray-800 text-white"></div>
-          <div><label class="block mb-1">Apple Music Artist Profile</label><input type="url" class="w-full p-2 rounded bg-gray-800 text-white"></div>
-          <button type="submit" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded">Upload</button>
-        </form>
-        <div class="mt-6">
-          <button class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded">Add More Tracks</button>
-        </div>
-      </div>
+      row.innerHTML = `
+        <td class="p-2">${data.trackName}</td>
+        <td class="p-2">${data.streams || 0}</td>
+        <td class="p-2">${new Date(data.createdAt).toISOString().slice(0, 10)}</td>
+        <td class="p-2 text-yellow-400">${data.status || "Pending"}</td>
+      `;
 
-      <!-- My Releases Section -->
-      <div id="releases" class="bg-gray-900 p-6 rounded-xl shadow-xl">
-        <h4 class="text-2xl font-semibold text-purple-400 mb-6">My Releases</h4>
-        <table class="min-w-full table-auto">
-          <thead>
-            <tr class="text-left text-purple-300 border-b border-gray-700">
-              <th class="p-2">Track</th>
-              <th class="p-2">Streams</th>
-              <th class="p-2">Release Date</th>
-              <th class="p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-gray-800">
-              <td class="p-2">Dream Chaser</td>
-              <td class="p-2">5,200</td>
-              <td class="p-2">2025-05-01</td>
-              <td class="p-2 text-green-400">Live</td>
-            </tr>
-            <tr class="border-b border-gray-800">
-              <td class="p-2">Skyline</td>
-              <td class="p-2">3,840</td>
-              <td class="p-2">2025-04-15</td>
-              <td class="p-2 text-yellow-400">Pending</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const ctx = document.getElementById('streamChart').getContext('2d');
-    const streamChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-          label: 'Streams',
-          data: [800, 1200, 1000, 1500, 1800, 2200],
-          backgroundColor: 'rgba(168, 85, 247, 0.2)',
-          borderColor: 'rgba(168, 85, 247, 1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4
-        }]
-      },
-      options: {
-        plugins: { legend: { labels: { color: 'white' } } },
-        scales: {
-          x: { ticks: { color: 'white' } },
-          y: { ticks: { color: 'white' } }
-        }
-      }
+      releasesTable.appendChild(row);
     });
-  </script>
-</body>
-</html>
+  });
+</script>

@@ -12,25 +12,40 @@
       margin: 0;
     }
   </style>
-  <script>
-    // Cloudinary API Key
-    const CLOUDINARY_API_KEY = "289769691352834";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    function handleLogin(event) {
+    const firebaseConfig = {
+      apiKey: "AIzaSyCwl7UYdBWRwLriPt_IzbnLFFZVlesxIuo",
+      authDomain: "raagverse-dd6c6.firebaseapp.com",
+      projectId: "raagverse-dd6c6",
+      storageBucket: "raagverse-dd6c6.appspot.com",
+      messagingSenderId: "989061470150",
+      appId: "1:989061470150:web:7bb48fea2dde588c4ec4c7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.handleLogin = async function(event) {
       event.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      // Simple demo login credentials
-      const demoEmail = "test@raagverse.com";
-      const demoPassword = "raagverse123";
-
-      if (email === demoEmail && password === demoPassword) {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
         alert("Login successful! Redirecting to dashboard...");
         window.location.href = "dashboard.html";
-      } else {
+      } catch (error) {
         alert("Invalid email or password. Please try again.");
+        console.error(error);
       }
+    }
+
+    window.redirectToLoginFromHome = function() {
+      window.location.href = "login.html";
     }
   </script>
 </head>
@@ -56,6 +71,9 @@
       <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded text-lg font-semibold">Login</button>
     </form>
     <p class="text-center text-sm text-gray-400 mt-6">Don't have an account? <a href="signup.html" class="text-purple-400 hover:underline">Sign up here</a></p>
+    <div class="mt-8 text-center">
+      <button onclick="redirectToLoginFromHome()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg font-medium">← Back to Homepage</button>
+    </div>
   </div>
 </body>
 </html>
